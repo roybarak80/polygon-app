@@ -1,18 +1,18 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IPolygon extends mongoose.Document {
-    name: string;
-    points: { x: number; y: number }[];
+export interface Point {
+    x: number;
+    y: number;
 }
 
-const PointSchema = new Schema({
-    x: { type: Number, required: true },
-    y: { type: Number, required: true },
-});
+export interface IPolygon extends Document {
+    name: string;
+    points: Point[];
+}
 
-const PolygonSchema = new Schema({
+const PolygonSchema: Schema = new Schema({
     name: { type: String, required: true },
-    points: [PointSchema],
+    points: [{ x: { type: Number, required: true }, y: { type: Number, required: true } }],
 });
 
 export default mongoose.model<IPolygon>('Polygon', PolygonSchema);
