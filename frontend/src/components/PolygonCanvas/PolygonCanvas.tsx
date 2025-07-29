@@ -24,6 +24,7 @@ const PolygonCanvas: React.FC = () => {
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
 
@@ -88,11 +89,19 @@ const PolygonCanvas: React.FC = () => {
     setIsLoading(true);
     setError(null);
     fetch(`${API_BASE_URL}/api/polygons`)
-      .then(res => {
+      .then(async res => {
         if (!res.ok) {
-          throw new Error(`Failed to fetch polygons: ${res.status} ${res.statusText}`);
+          // Try to parse JSON error response
+          try {
+            const data = await res.json();
+            throw new Error(data.error || `Failed to fetch polygons: ${res.status} ${res.statusText}`);
+          } catch (parseError) {
+            // If JSON parsing fails, it's likely an HTML error page
+            throw new Error(`Backend server is not available. Please ensure the backend is running.`);
+          }
         }
-        return res.json();
+        const data = await res.json();
+        return data;
       })
       .then(data => {
         setPolygons(data);
@@ -100,7 +109,7 @@ const PolygonCanvas: React.FC = () => {
       })
       .catch(err => {
         console.error('Fetch error:', err);
-        setError('Failed to load polygons. Please try again.');
+        setError(err.message || 'Failed to load polygons. Please try again.');
         setIsLoading(false);
       });
   }, []);
@@ -119,42 +128,103 @@ const PolygonCanvas: React.FC = () => {
     setPoints([...points, { x, y }]);
   };
 
-  const handleSave = () => {
-    if (name && points.length >= 3) {
-      setIsSaving(true);
-      setError(null);
-      fetch(`${API_BASE_URL}/api/polygons`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, points })
-      })
-        .then(res => {
-          if (!res.ok) {
-            throw new Error(`Failed to save polygon: ${res.status} ${res.statusText}`);
-          }
-          return res.json();
-        })
-        .then(data => {
-          setPolygons([...polygons, data]);
-          setName('');
-          setPoints([]);
-          setIsSaving(false);
-        })
-        .catch(err => {
-          console.error('Save error:', err);
-          setError('Failed to save polygon. Please try again.');
-          setIsSaving(false);
-        });
+  // Validation functions
+  const validateName = (name: string): string | null => {
+    if (!name || name.trim().length === 0) {
+      return 'Polygon name is required';
     }
+    if (name.trim().length > 100) {
+      return 'Polygon name cannot exceed 100 characters';
+    }
+    if (!/^[a-zA-Z0-9\s\-_]+$/.test(name.trim())) {
+      return 'Polygon name can only contain letters, numbers, spaces, hyphens, and underscores';
+    }
+    return null;
+  };
+
+  const validatePoints = (points: Point[]): string | null => {
+    if (points.length < 3) {
+      return 'Polygon must have at least 3 points';
+    }
+    if (points.length > 100) {
+      return 'Polygon cannot have more than 100 points';
+    }
+    return null;
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+    const error = validateName(value);
+    setNameError(error);
+  };
+
+  const handleSave = () => {
+    // Clear previous errors
+    setError(null);
+    setNameError(null);
+
+    // Validate name
+    const nameValidationError = validateName(name);
+    if (nameValidationError) {
+      setNameError(nameValidationError);
+      return;
+    }
+
+    // Validate points
+    const pointsValidationError = validatePoints(points);
+    if (pointsValidationError) {
+      setError(pointsValidationError);
+      return;
+    }
+
+    setIsSaving(true);
+    fetch(`${API_BASE_URL}/api/polygons`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name.trim(), points })
+    })
+      .then(async res => {
+        if (!res.ok) {
+          // Try to parse JSON error response
+          try {
+            const data = await res.json();
+            throw new Error(data.error || `Failed to save polygon: ${res.status} ${res.statusText}`);
+          } catch (parseError) {
+            // If JSON parsing fails, it's likely an HTML error page
+            throw new Error(`Backend server is not available. Please ensure the backend is running.`);
+          }
+        }
+        const data = await res.json();
+        return data;
+      })
+      .then(data => {
+        setPolygons([...polygons, data]);
+        setName('');
+        setPoints([]);
+        setIsSaving(false);
+      })
+      .catch(err => {
+        console.error('Save error:', err);
+        setError(err.message || 'Failed to save polygon. Please try again.');
+        setIsSaving(false);
+      });
   };
 
   const handleDelete = (id: string) => {
     setDeletingIds(prev => new Set(prev).add(id));
     setError(null);
     fetch(`${API_BASE_URL}/api/polygons/${id}`, { method: 'DELETE' })
-      .then(res => {
+      .then(async res => {
         if (!res.ok) {
-          throw new Error(`Failed to delete polygon: ${res.status} ${res.statusText}`);
+          // Try to parse JSON error response
+          try {
+            const data = await res.json();
+            throw new Error(data.error || `Failed to delete polygon: ${res.status} ${res.statusText}`);
+          } catch (parseError) {
+            // If JSON parsing fails, it's likely an HTML error page
+            throw new Error(`Backend server is not available. Please ensure the backend is running.`);
+          }
         }
         setPolygons(polygons.filter(p => p.id !== id));
         setDeletingIds(prev => {
@@ -165,7 +235,7 @@ const PolygonCanvas: React.FC = () => {
       })
       .catch(err => {
         console.error('Delete error:', err);
-        setError('Failed to delete polygon. Please try again.');
+        setError(err.message || 'Failed to delete polygon. Please try again.');
         setDeletingIds(prev => {
           const newSet = new Set(prev);
           newSet.delete(id);
@@ -183,13 +253,18 @@ const PolygonCanvas: React.FC = () => {
           <div className="sections-wrapper">
             <div className="canvas-section">
               <div className="input-section">
-                <input
-                  type="text"
-                  className="input-field"
-                  placeholder="Enter polygon name..."
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                />
+                <div className="input-wrapper">
+                  <input
+                    type="text"
+                    className={`input-field ${nameError ? 'input-error' : ''}`}
+                    placeholder="Enter polygon name..."
+                    value={name}
+                    onChange={handleNameChange}
+                  />
+                  {nameError && (
+                    <div className="input-error-message">{nameError}</div>
+                  )}
+                </div>
                 <button
                   className={`save-button ${isSaving ? 'saving' : ''}`}
                   disabled={!name || points.length < 3 || isSaving}
