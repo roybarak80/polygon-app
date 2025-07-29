@@ -12,6 +12,7 @@ async function connectWithRetry(maxRetries = 5, delay = 2000) {
                 useNewUrlParser: true,
                 useUnifiedTopology: true,
             } as any);
+            console.log('Successfully connected to MongoDB for tests');
             return;
         } catch (error: any) { // Explicitly type error as 'any'
             console.log(`Connection attempt ${i + 1} failed: ${(error as Error).message}`);

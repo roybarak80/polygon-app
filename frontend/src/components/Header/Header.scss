@@ -1,0 +1,28 @@
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 0;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .title {
+    font-size: 2.5rem;
+    font-weight: normal;
+    margin-bottom: 0.5rem;
+    font-family: 'Fugaz One', cursive;
+    letter-spacing: 0.05em;
+  }
+
+  .subtitle {
+    font-size: 1.4rem;
+    opacity: 0.9;
+    font-weight: 300;
+    margin: 0;
+  }
+} 
