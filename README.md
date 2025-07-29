@@ -40,6 +40,29 @@ docker-compose up --build
 3. **Save**: Click "Save Polygon" to store it
 4. **Manage**: View and delete existing polygons from the list
 
+## Input Validation
+
+The application includes comprehensive input validation to ensure data integrity and provide a better user experience.
+
+### Polygon Name Validation
+- **Required**: Polygon name cannot be empty
+- **Length**: Must be between 1 and 100 characters
+- **Characters**: Only letters, numbers, spaces, hyphens, and underscores allowed
+- **Uniqueness**: Each polygon name must be unique
+- **Real-time feedback**: Validation errors appear as you type
+
+### Polygon Points Validation
+- **Minimum points**: At least 3 points required to form a polygon
+- **Maximum points**: No more than 100 points per polygon
+- **Coordinate bounds**: All points must be within canvas bounds (0-800, 0-600)
+- **Data types**: Coordinates must be valid numbers
+
+### Error Handling
+- **Frontend validation**: Real-time validation with visual feedback
+- **Backend validation**: Server-side validation for security
+- **User-friendly messages**: Clear, actionable error messages
+- **Network error handling**: Graceful handling of backend connectivity issues
+
 ## Tech Stack
 
 - **Frontend**: React, TypeScript, SCSS
