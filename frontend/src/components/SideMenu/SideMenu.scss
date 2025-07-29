@@ -1,0 +1,110 @@
+.side-menu {
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-right: 1.5rem;
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+
+  .menu-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f3f4f6;
+
+    h3 {
+      font-family: 'Archivo', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0;
+    }
+  }
+
+  .steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f9fafb;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+    transform: translateX(-10px);
+
+    &.active {
+      opacity: 1;
+      transform: translateX(0);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-color: #4f46e5;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+      .step-number {
+        background: white;
+        color: #667eea;
+        transform: scale(1.1);
+      }
+
+      .step-title {
+        color: white;
+      }
+
+      .step-description {
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    &:not(.active) {
+      &:hover {
+        opacity: 0.8;
+        transform: translateX(-5px);
+        background: #f3f4f6;
+      }
+    }
+  }
+
+  .step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-title {
+    font-family: 'Archivo', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 0.25rem 0;
+    transition: color 0.3s ease;
+  }
+
+  .step-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.4;
+    transition: color 0.3s ease;
+  }
+} 
